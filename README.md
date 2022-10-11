@@ -36,16 +36,19 @@ http {
     # OpenResty bundle:
     lua_package_path "/path/to/lua-resty-core/lib/?.lua;/path/to/lua-resty-jsonnet/lib/?.lua;;";
 
+    init_worker_by_lua_block {
+        local jsonnet = require "resty.jsonnet"
+        jsonnet.init()
+    }
+
     server {
         ...
 
         location /t {
             content_by_lua_block {
-                local jsn = require "resty.jsonnet"
+                local jsonnet = require "resty.jsonnet"
 
                 local jsonnet_snippet = '{ x: 1 , y: self.x + 1 } { x: 10 }'
-
-                local jsonnet = jsn.new()
                 local res, err = jsonnet:evaluate_snippet("snippet", jsonnet_snippet)
                 ngx.say(res)
             }
@@ -70,22 +73,22 @@ To load this library,
 2. you use `require` to load the library into a local Lua variable:
 
 ```lua
-    local jsn = require "resty.jsonnet"
+    local jsonnet = require "resty.jsonnet"
 ```
 
 [Back to TOC](#table-of-contents)
 
-new
+init
 ---
-`syntax: jsonnet = jsn.new()`
+`syntax: jsonnet = jsonnet.init()`
 
-Creates a new jsonnet instance which maintains a `JsonnetVm` object internally.
+Init a new jsonnet instance which maintains a `JsonnetVm` object internally.
 
 [Back to TOC](#table-of-contents)
 
 evaluate_snippet
 ----
-`syntax: res, err = jsonnet:evaluate_snippet(filename, snippet)`
+`syntax: res, err = jsonnet.evaluate_snippet(filename, snippet)`
 
 Evaluate Jsonnet snippets to output json data.
 
@@ -122,7 +125,7 @@ Also, You need to configure the lua_package_path directive to add the path of yo
 and then load the library in Lua:
 
 ```lua
-    local jsn = require "resty.jsonnet"
+    local jsonnet = require "resty.jsonnet"
 ```
 
 [Back to TOC](#table-of-contents)
