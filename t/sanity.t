@@ -6,7 +6,12 @@ use Cwd qw(cwd);
 my $pwd = cwd();
 
 our $HttpConfig = qq{
-    lua_package_path "$pwd/lib/?.lua;;";
+  lua_package_path "$pwd/lib/?.lua;;";
+
+  init_worker_by_lua_block {
+    local jsonnet = require "resty.jsonnet"
+    jsonnet.init()
+  }
 };
 
 run_tests();
@@ -16,17 +21,15 @@ __DATA__
 === TEST 1: jsonnet_evaluate_snippet
 --- http_config eval: $::HttpConfig
 --- config
- location /t {
+location /t {
   content_by_lua_block {
-    local jsn = require "resty.jsonnet"
+    local jsonnet = require "resty.jsonnet"
 
     local jsonnet_snippet = '{ x: 1 , y: self.x + 1 } { x: 10 }'
-
-    local jsonnet = jsn.new()
-    local json, err = jsonnet:evaluate_snippet("snippet", jsonnet_snippet)
+    local json, err = jsonnet.evaluate_snippet("snippet", jsonnet_snippet)
     ngx.say(json)
   }
- }
+}
 --- request
 GET /t
 --- response_body

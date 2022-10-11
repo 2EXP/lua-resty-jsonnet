@@ -77,9 +77,11 @@ ffi.cdef[[
 
 local error_type = ffi.typeof("int[?]")
 
-local function _return(vm, out, error)
+local _vm
+
+local function _return(out, error)
   local out_data = ffi.string(out)
-  jsonnet.jsonnet_realloc(vm, out, 0)
+  jsonnet.jsonnet_realloc(_vm, out, 0)
 
   if error[0] == 0 then
     return out_data
@@ -88,9 +90,9 @@ local function _return(vm, out, error)
   end
 end
 
-function _M.new()
-  local vm = jsonnet.jsonnet_make()
-  return setmetatable({ vm = vm }, mt)
+function _M.init()
+  _vm = jsonnet.jsonnet_make()
+  return setmetatable({}, mt)
 end
 
 function _M.version()
@@ -98,94 +100,94 @@ function _M.version()
   return ffi.string(version)
 end
 
-function _M.max_stack(self, v)
-  jsonnet.jsonnet_max_stack(self.vm, v)
+function _M.max_stack(v)
+  jsonnet.jsonnet_max_stack(_vm, v)
 end
 
-function _M.gc_min_objects(self, v)
-  jsonnet.jsonnet_gc_min_objects(self.vm, v)
+function _M.gc_min_objects(v)
+  jsonnet.jsonnet_gc_min_objects(_vm, v)
 end
 
-function _M.gc_growth_trigger(self, v)
-  jsonnet.jsonnet_gc_growth_trigger(self.vm, v)
+function _M.gc_growth_trigger(v)
+  jsonnet.jsonnet_gc_growth_trigger(_vm, v)
 end
 
-function _M.string_output(self, v)
-  jsonnet.jsonnet_string_output(self.vm, v)
+function _M.string_output(v)
+  jsonnet.jsonnet_string_output(_vm, v)
 end
 
-function _M.import_callback(self, cb, ctx)
-  jsonnet.jsonnet_import_callback(self.vm, cb, ctx)
+function _M.import_callback(cb, ctx)
+  jsonnet.jsonnet_import_callback(_vm, cb, ctx)
 end
 
-function _M.ext_var(self, key, val)
-  jsonnet.jsonnet_ext_var(self.vm, key, val)
-end
-  
-function _M.ext_code(self, key, val)
-  jsonnet.jsonnet_ext_code(self.vm, key, val)
-end
-
-function _M.tla_var(self, key, val)
-  jsonnet.jsonnet_tla_var(self.vm, key, val)
-end
-
-function _M.tla_code(self, key, val)
-  jsonnet.jsonnet_tla_code(self.vm, key, val)
-end
-
-function _M.max_trace(self, v)
-  jsonnet.jsonnet_max_trace(self.vm, v)
-end
-
-function _M.jpath_add(self, v)
-  jsonnet.jsonnet_jpath_add(self.vm, v)
-end
-
-function _M.evaluate_file(self, json_file)
-  local error = ffi.new(error_type, 1)
-  local out = jsonnet.jsonnet_evaluate_file(self.vm, json_file, error)
-
-  return _return(self.vm, out, error)
-end
-
-function _M.evaluate_snippet(self, json_file, json_snippet)
-  local error = ffi.new(error_type, 1)
-  local out = jsonnet.jsonnet_evaluate_snippet(self.vm, json_file, json_snippet, error)
-
-  return _return(self.vm, out, error)
-end
-
-function _M.evaluate_file_multi(self, json_file)
-  local error = ffi.new(error_type, 1)
-  local out = jsonnet.jsonnet_evaluate_file_multi(self.vm, json_file, error)
-
-  return _return(self.vm, out, error)
-end
-
-function _M.evaluate_snippet_multi(self, json_file, json_snippet)
-  local error = ffi.new(error_type, 1)
-  local out = jsonnet.jsonnet_evaluate_snippet_multi(self.vm, json_file, json_snippet, error)
-
-  return _return(self.vm, out, error)
+function _M.ext_var(key, val)
+  jsonnet.jsonnet_ext_var(_vm, key, val)
 end
   
-function _M.evaluate_file_stream(self, json_file)
-  local error = ffi.new(error_type, 1)
-  local out = jsonnet.jsonnet_evaluate_file_stream(self.vm, json_file, error)
-
-  return _return(self.vm, out, error)
+function _M.ext_code(key, val)
+  jsonnet.jsonnet_ext_code(_vm, key, val)
 end
 
-function _M.evaluate_snippet_stream(self, json_file, json_snippet)
-  local error = ffi.new(error_type, 1)
-  local out = jsonnet.jsonnet_evaluate_snippet_stream(self.vm, json_file, json_snippet, error)
-
-  return _return(self.vm, out, error)
+function _M.tla_var(key, val)
+  jsonnet.jsonnet_tla_var(_vm, key, val)
 end
 
-function _M.close(self)
-  jsonnet.jsonnet_destroy(self.vm)
+function _M.tla_code(key, val)
+  jsonnet.jsonnet_tla_code(_vm, key, val)
+end
+
+function _M.max_trace(v)
+  jsonnet.jsonnet_max_trace(_vm, v)
+end
+
+function _M.jpath_add(v)
+  jsonnet.jsonnet_jpath_add(_vm, v)
+end
+
+function _M.evaluate_file(json_file)
+  local error = ffi.new(error_type, 1)
+  local out = jsonnet.jsonnet_evaluate_file(_vm, json_file, error)
+
+  return _return(out, error)
+end
+
+function _M.evaluate_snippet(json_file, json_snippet)
+  local error = ffi.new(error_type, 1)
+  local out = jsonnet.jsonnet_evaluate_snippet(_vm, json_file, json_snippet, error)
+
+  return _return(out, error)
+end
+
+function _M.evaluate_file_multi(json_file)
+  local error = ffi.new(error_type, 1)
+  local out = jsonnet.jsonnet_evaluate_file_multi(_vm, json_file, error)
+
+  return _return(out, error)
+end
+
+function _M.evaluate_snippet_multi(json_file, json_snippet)
+  local error = ffi.new(error_type, 1)
+  local out = jsonnet.jsonnet_evaluate_snippet_multi(_vm, json_file, json_snippet, error)
+
+  return _return(out, error)
+end
+  
+function _M.evaluate_file_stream(json_file)
+  local error = ffi.new(error_type, 1)
+  local out = jsonnet.jsonnet_evaluate_file_stream(_vm, json_file, error)
+
+  return _return(out, error)
+end
+
+function _M.evaluate_snippet_stream(json_file, json_snippet)
+  local error = ffi.new(error_type, 1)
+  local out = jsonnet.jsonnet_evaluate_snippet_stream(_vm, json_file, json_snippet, error)
+
+  return _return(out, error)
+end
+
+function _M.destroy()
+  jsonnet.jsonnet_destroy(_vm)
 end
 
 return _M
